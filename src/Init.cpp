@@ -12,7 +12,7 @@ namespace CL {
 
     bool setup_success = false;
 
-    void Init() {
+    cl_int Init() {
         cl_int err;
         cl_uint num_platforms;
 
@@ -20,7 +20,7 @@ namespace CL {
 
         if (err != CL_SUCCESS) {
             std::cout << "clGetPlatformIDs error: " << err << "\n";
-            return;
+            return 1;
         }
 
         std::cout << num_platforms << " platforms/s.\n";
@@ -29,31 +29,31 @@ namespace CL {
 
         if (err != CL_SUCCESS) {
             std::cout << "clGetPlatformIDs error: " << err << "\n";
-            return;
+            return 1;
         }
 
         err = clGetDeviceIDs(platform_ids[0], GPU ? CL_DEVICE_TYPE_GPU : CL_DEVICE_TYPE_CPU, 1, &device_id, nullptr);
 
         if (err != CL_SUCCESS) {
             std::cout << "clGetDeviceIDs error: " << err << "\n";
-            return;
+            return 1;
         }
 
         context = clCreateContext(nullptr, 1, &device_id, nullptr, nullptr, &err);
 
         if (!context) {
             std::cout << "clCreateContext error: " << err << "\n";
-            return;
+            return 1;
         }
 
         command_queue = clCreateCommandQueue(context, device_id, 0, &err);
 
         if (!command_queue) {
             std::cout << "clCreateCommandQueue error: " << err << "\n";
-            return;
+            return 1;
         }
 
-        setup_success = true;
+        return CL_SUCCESS;
     }
 
     void Destroy() {

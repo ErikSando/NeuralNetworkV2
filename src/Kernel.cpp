@@ -69,8 +69,6 @@ Kernel::Kernel(const char* kernel_path, const char* name) {
         std::cout << "Failed to create compute kernel.\n";
         return;
     }
-
-    setup_sucess = true;
 }
 
 Kernel::~Kernel() {

@@ -10,8 +10,6 @@ namespace CL {
     extern cl_context context;
     extern cl_command_queue command_queue;
 
-    extern bool setup_success;
-
-    extern void Init();
+    extern cl_int Init();
     extern void Destroy();
 }

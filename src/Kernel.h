@@ -9,11 +9,9 @@ class Kernel {
     ~Kernel();
 
     template<typename T>
-    cl_int SetArgument(cl_uint index, T* value) {
-        return clSetKernelArg(clkernel, index, sizeof(T), value);
+    cl_int SetArgument(cl_uint index, const T& value) {
+        return clSetKernelArg(clkernel, index, sizeof(T), &value);
     }
-
-    bool setup_sucess = false;
 
     cl_program clprogram;
     cl_kernel clkernel;
