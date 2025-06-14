@@ -1,5 +1,7 @@
 #pragma once
 
+#include <CL/cl.h>
+
 #include "Kernel.h"
 
 namespace Matrix {
@@ -9,6 +11,11 @@ namespace Matrix {
      * size - length of the matrix (rows * columns)
      */
     cl_int Create(const float* mat, cl_mem* dev_mem, const int size);
+
+    /**
+     * Calls clReleaseMemObject on the passed device memory.
+     */
+    void Destroy(cl_mem& dev_mem);
 
     /**
      * Performs C = AB, returns error code (0 means sucess)

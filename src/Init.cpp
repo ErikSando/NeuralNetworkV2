@@ -55,4 +55,9 @@ namespace CL {
 
         setup_success = true;
     }
+
+    void Destroy() {
+        clReleaseCommandQueue(command_queue);
+        clReleaseContext(context);
+    }
 }

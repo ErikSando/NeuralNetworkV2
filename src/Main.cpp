@@ -6,6 +6,13 @@
 #include "Matrix.h"
 #include "Thing.h"
 
+void clean_up(cl_mem& dmA, cl_mem& dmB, cl_mem& dmC) {
+    Matrix::Destroy(dmA); // are checked to be non-null in Matrix::Destroy
+    Matrix::Destroy(dmB);
+    Matrix::Destroy(dmC);
+    CL::Destroy();
+}
+
 int main() {
     CL::Init();
 
@@ -47,10 +54,13 @@ int main() {
 
     if (err != CL_SUCCESS) {
         std::cout << "Failed to create matrices.\n";
+        clean_up(dmA, dmB, dmC);
         return 1;
     }
 
     err = Matrix::Multiply(kernel, &dmA, &dmB, &dmC, C, 3, 3);
+
+    clean_up(dmA, dmB, dmC);
 
     if (err != CL_SUCCESS) {
         std::cout << "Failed to multiply matrices.\n";

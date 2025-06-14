@@ -1,5 +1,4 @@
 // Based on https://ecatue.gitlab.io/GPU2016/cookbook/matrix_multiplication_opencl/
-// bounds checking must be done by the host code
 
 __kernel void MatrixMultiply(
     __global const float* A, // M x K

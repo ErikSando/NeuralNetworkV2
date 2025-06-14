@@ -6,6 +6,7 @@ class Kernel {
     public:
 
     Kernel(const char* kernel_path, const char* name);
+    ~Kernel();
 
     template<typename T>
     cl_int SetArgument(cl_uint index, T* value) {

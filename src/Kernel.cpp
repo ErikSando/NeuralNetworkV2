@@ -72,3 +72,8 @@ Kernel::Kernel(const char* kernel_path, const char* name) {
 
     setup_sucess = true;
 }
+
+Kernel::~Kernel() {
+    clReleaseKernel(clkernel);
+    clReleaseProgram(clprogram);
+}

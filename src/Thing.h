@@ -13,4 +13,5 @@ namespace CL {
     extern bool setup_success;
 
     extern void Init();
+    extern void Destroy();
 }

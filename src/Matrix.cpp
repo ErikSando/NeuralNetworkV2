@@ -1,5 +1,8 @@
 #include <iostream>
 
+#include <CL/cl.h>
+
+#include "Kernel.h"
 #include "Matrix.h"
 #include "Thing.h"
 
@@ -18,6 +21,10 @@ namespace Matrix {
         }
 
         return 0;
+    }
+
+    void Destroy(cl_mem& dev_mem) {
+        if (dev_mem) clReleaseMemObject(dev_mem);
     }
 
     cl_int Multiply(Kernel& kernel, const cl_mem* dmA, const cl_mem* dmB, cl_mem* dmC, float* C, const int cA, const int cB) {
