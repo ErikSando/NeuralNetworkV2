@@ -1,6 +1,6 @@
 #pragma once
 
-#include <CL/cl.h>
+#include "CL/cl.h"
 
 class Kernel {
     public:

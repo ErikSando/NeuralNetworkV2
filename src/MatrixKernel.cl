@@ -22,6 +22,7 @@ __kernel void MatrixMultiply(
     C[row * N + col] = sum;
 }
 
+// I don't think I need this one
 __kernel void BatchedMatrixMultiply(
     __global const float* A,
     __global const float* B,
@@ -50,7 +51,30 @@ __kernel void BatchedMatrixMultiply(
     C[row * N + col + C_offset] = sum;
 }
 
-__kernel void MatrixAdd(__global const float* m1, __global const float* m2, __global float* out) {
+__kernel void MatrixAdd(__global const float* A, __global const float* B, __global float* C) {
     int index = get_global_id(0);
-    out[index] = m1[index] + m2[index];
+    C[index] = A[index] + B[index];
+}
+
+__kernel void MatrixScale(__global float* mat, const float k) {
+    int index = get_global_id(0);
+    mat[index] *= k;
+}
+
+uint xorshift(uint x) {
+    x ^= x << 13;
+    x ^= x >> 17;
+    x ^= x << 5;
+    return x;
+}
+
+float randf(uint seed) {
+    uint rand = xorshift(seed);
+    return (float) (rand) / 0x100000000f;
+}
+
+__kernel void MatrixRandomise(__global float* mat, float min, float max, uint seed) {
+    int index = get_global_id(0);
+    float rand = randf(seed + index * 1234567) * (max - min) + min;
+    mat[index] = rand;
 }

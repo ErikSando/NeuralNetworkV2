@@ -2,7 +2,7 @@
 #include <iostream>
 #include <sstream>
 
-#include <CL/cl.h>
+#include "CL/cl.h"
 
 #include "Kernel.h"
 #include "Thing.h"
@@ -37,7 +37,7 @@ Kernel::Kernel(const char* kernel_path, const char* name) {
 
     if (!kernel_src) {
         delete[] kernel_src;
-        std::cout << "Failed to create kernel: failed to read kernel source\n";
+        std::cout << "Failed to read kernel source: " << kernel_path << " (" << FILE_NAME(__FILE__) << " > Kernel::Kernel)\n";
         return;
     }
 
@@ -48,7 +48,7 @@ Kernel::Kernel(const char* kernel_path, const char* name) {
     delete[] kernel_src;
 
     if (!clprogram) {
-        std::cout << "Failed to create compute program: " << err << "\n";
+        std::cout << "Failed to create compute program: " << err << " (" << FILE_NAME(__FILE__) << " > Kernel::Kernel)\n";
         return;
     }
 
@@ -58,7 +58,7 @@ Kernel::Kernel(const char* kernel_path, const char* name) {
         size_t length;
         char buffer[2048];
         clGetProgramBuildInfo(clprogram, CL::device_id, CL_PROGRAM_BUILD_LOG, sizeof(buffer), buffer, &length);
-        std::cout << "Failed to build program executible.\n";
+        std::cout << "Failed to build program executible: " << err << " (" << FILE_NAME(__FILE__) << " > Kernel::Kernel)\n";
         std::cout << buffer << "\n";
         return;
     }
@@ -66,7 +66,7 @@ Kernel::Kernel(const char* kernel_path, const char* name) {
     clkernel = clCreateKernel(clprogram, name, &err);
 
     if (!clkernel || err != CL_SUCCESS) {
-        std::cout << "Failed to create compute kernel.\n";
+        std::cout << "Failed to create compute kernel: " << err << " (" << FILE_NAME(__FILE__) << " > Kernel::Kernel)\n";
         return;
     }
 }
