@@ -9,20 +9,24 @@
 #include "Thing.h"
 #include "NeuralNetwork.h"
 
+float randf() {
+    return (float) rand() / (float) RAND_MAX;
+}
+
 int CommandLoop() {
     srand(time(nullptr));
 
-    Kernel kernel_mmul("src/MatrixKernel.cl", "MatrixMultiply");
-    Kernel kernel_bmmul("src/MatrixKernel.cl", "BatchedMatrixMultiply");
-    Kernel kernel_madd("src/MatrixKernel.cl", "MatrixAdd");
-    Kernel kernel_actv("src/ActivationKernel.cl", "ReLU");
+    // Kernel kernel_mmul("src/MatrixKernel.cl", "MatrixMultiply");
+    // Kernel kernel_bmmul("src/MatrixKernel.cl", "BatchedMatrixMultiply");
+    // Kernel kernel_madd("src/MatrixKernel.cl", "MatrixAdd");
+    // Kernel kernel_actv("src/ActivationKernel.cl", "ReLU");
 
-    if (!kernel_mmul.clkernel || !kernel_bmmul.clkernel || !kernel_madd.clkernel || !kernel_actv.clkernel) {
-        std::cout << "Failed to create kernel (" << FILE_NAME(__FILE__) << ")\n";
-        return 1;
-    }
+    // if (!kernel_mmul.clkernel || !kernel_bmmul.clkernel || !kernel_madd.clkernel || !kernel_actv.clkernel) {
+    //     std::cout << "Failed to create kernel (" << FILE_NAME(__FILE__) << ")\n";
+    //     return 1;
+    // }
 
-    NeuralNetwork network(kernel_mmul, kernel_bmmul, kernel_madd, kernel_actv);
+    NeuralNetwork network;
 
     std::string command;
 
@@ -49,11 +53,11 @@ int CommandLoop() {
             std::cout << "help:\n- Shows this menu.\n";
         }
         else if (cmd == "getout") {
-            std::array<float, BATCH_SIZE * NODE_COUNT[INPUT]> inputs;
-            std::array<float, BATCH_SIZE * NODE_COUNT[OUTPUT]> outputs;
+            std::array<float, BxI> inputs;
+            std::array<float, BxO> outputs;
 
             for (size_t i = 0; i < BATCH_SIZE * NODE_COUNT[INPUT]; i++) {
-                inputs[i] = rand();
+                inputs[i] = randf();// * 255;
             }
 
             network.GetOutputs(inputs, outputs);

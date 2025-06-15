@@ -9,8 +9,20 @@ enum Layer {
     INPUT, HIDDEN_1, HIDDEN_2, OUTPUT
 };
 
+constexpr const char* MAT_KRNL_PATH = "src/MatrixKernel.cl";
+constexpr const char* ACTV_KRNL_PATH = "src/ActivationKernel.cl";
+
 constexpr size_t BATCH_SIZE = 32;
 constexpr size_t NODE_COUNT[4] = { 28 * 28, 128, 64, 10 };
+
+constexpr size_t IxH1 = NODE_COUNT[INPUT] * NODE_COUNT[HIDDEN_1];
+constexpr size_t H1xH2 = NODE_COUNT[HIDDEN_1] * NODE_COUNT[HIDDEN_2];
+constexpr size_t H2xO = NODE_COUNT[HIDDEN_2] * NODE_COUNT[OUTPUT];
+
+constexpr size_t BxI = BATCH_SIZE * NODE_COUNT[INPUT];
+constexpr size_t BxH1 = BATCH_SIZE * NODE_COUNT[HIDDEN_1];
+constexpr size_t BxH2 = BATCH_SIZE * NODE_COUNT[HIDDEN_2];
+constexpr size_t BxO = BATCH_SIZE * NODE_COUNT[OUTPUT];
 
 constexpr size_t round_up(size_t lws, size_t dim) {
     return ((dim + lws - 1) / lws) * lws;
@@ -46,15 +58,15 @@ namespace WorkSize {
 class NeuralNetwork {
     public:
 
-    NeuralNetwork(Kernel& mat_mul, Kernel& batched_mat_mul, Kernel& mat_add, Kernel& activation);
+    NeuralNetwork();
     ~NeuralNetwork();
 
     // void Train(int epochs);
     // void Test(int samples);
 
     cl_int GetOutputs(
-        const std::array<float, BATCH_SIZE * NODE_COUNT[INPUT]>& inputs,
-        std::array<float, BATCH_SIZE * NODE_COUNT[OUTPUT]>& outputs
+        const std::array<float, BxI>& inputs,
+        std::array<float, BxO>& outputs
     );
 
     cl_mem h1_nodes;
@@ -69,8 +81,9 @@ class NeuralNetwork {
     cl_mem h2_biases;
     cl_mem output_biases;
 
-    Kernel& kernel_mmul;
-    Kernel& kernel_bmmul;
-    Kernel& kernel_madd;
-    Kernel& kernel_actv;
+    Kernel* kernel_mscale;
+    Kernel* kernel_mmul;
+    Kernel* kernel_bmmul;
+    Kernel* kernel_madd;
+    Kernel* kernel_actv;
 };

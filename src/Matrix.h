@@ -7,11 +7,11 @@
 namespace Matrix {
     /**
      * Allocate device memory for a matrix, returns error code (0 means sucess)
-     * mat - array for the matrix
+     * host_mat - host array
      * dev_mem - device memory to store the elements into
      * size - size of the matrix (rows * columns)
      */
-    cl_int Create(const float* mat, cl_mem& dev_mem, const size_t size);
+    cl_int Create(const float* host_mat, cl_mem& dev_mem, const size_t size);
 
     /**
      * Calls clReleaseMemObject on the passed device memory.
@@ -31,7 +31,7 @@ namespace Matrix {
      * lws - local work size
      */
     cl_int Multiply(
-        Kernel& kernel,
+        Kernel* kernel,
         const cl_mem& dmA, const cl_mem& dmB, cl_mem& dmC,
         /*float* C,*/
         const int M, const int N, const int K,
@@ -43,7 +43,7 @@ namespace Matrix {
      * dmA - device memory for matrix A
      * dmB - device memory for matrix B
      * dmC - device memory for matrix C
-     * C - array for matrix C
+     * C - host array for matrix C
      * M - number of rows in matrix A
      * N - number columns in matrix B
      * K - number of columns in matrix A, and rows in matrix B
@@ -59,16 +59,39 @@ namespace Matrix {
      * size - size of the matrices (rows * columns)
      */
     cl_int Add(
-        Kernel& kernel,
+        Kernel* kernel,
         const cl_mem& dmA, const cl_mem& dmB, cl_mem& dmC,
         /*float* C,*/
         const size_t size
     );
 
     /**
-     * Read size bytes from src (device memory buffer) into dest (C array)
+     * Multiply the matrix by a scalar value
+     * mat - device memory of the matrix
+     * size - size of the matrix (rows * columns)
+     * k - scalar multiplier
      */
-    cl_int ReadInto(cl_mem& src, float* dest, size_t size);
+    cl_int Scale(Kernel* kernel, cl_mem& mat, const size_t size, const float k);
+
+    /**
+     * Copy device memory buffer into host memory buffer
+     * src - device memory buffer
+     * dest - host memory buffer
+     * size - number of bytes to copy
+     */
+    cl_int Transfer(cl_mem& src, float* dest, size_t size);
+    
+    /**
+     * Sets all values in the matrix to the specified number
+     * mat - device memory of the matrix
+     * size - size of the matrix (rows * columns)
+     * value - value to populate the matrix with
+     */
+    cl_int Populate(
+        Kernel* kernel,
+        cl_mem& mat,
+        const size_t size, const float value
+    );
 
     /**
      * Randomise each element in a matrix with a uniform distribution of floats in the range [min, max)
@@ -79,8 +102,9 @@ namespace Matrix {
      * max - upper bound
      * seed (optional) - random seed
      */
-    cl_int Randomise(Kernel& kernel,
+    cl_int Randomise(
+        Kernel* kernel,
         cl_mem& mat,
-        const size_t size, const float min, const float max, const uint32_t seed = 1804289383
+        const size_t size, const float min, const float max, uint32_t seed = 0
     );
 }
