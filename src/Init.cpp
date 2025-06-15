@@ -2,6 +2,7 @@
 
 #include "CL/cl.h"
 
+#include "Config.h"
 #include "Thing.h"
 
 namespace CL {

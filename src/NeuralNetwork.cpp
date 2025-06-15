@@ -4,6 +4,7 @@
 #include "CL/cl.h"
 
 #include "Activation.h"
+#include "Config.h"
 #include "Matrix.h"
 #include "NeuralNetwork.h"
 #include "Thing.h"
@@ -78,29 +79,6 @@ cl_int NeuralNetwork::GetOutputs(
         return err;
     }
 
-    // std::cout << "H1 Weights.\n";
-    // float array_verify[IxH1];
-    // Matrix::Transfer(h1_weights, array_verify, IxH1 * sizeof(float));
-    // std::cout << "\n";
-    // for (size_t i = 0; i < IxH1; i++) {
-    //     std::cout << " " << array_verify[i];
-    // }
-    // std::cout << "\n\n";
-
-    // err = Matrix::Scale(kernel_mscale, input_nodes, BxI, 1.0f / 255.0f);
-
-    // if (err != CL_SUCCESS) {
-    //     std::cout << "Failed to normalise input matrix: " << err << " (" << FILE_NAME(__FILE__) << " > NeuralNetwork::GetOutputs)\n";
-    //     return err;
-    // }
-
-    // i think ive seen it as mat * weights but from doing the math myself I think this works
-    // perhaps ive flipped the matrix layout? (or im just completely messing up)
-    // H1 = ReLU(w1 I + b1)
-    // H2 = ReLU(w2 H1 + b2)
-    // Out = Softmax(w_out H2 + b_out)
-
-    // err = Matrix::BatchedMultiply(kernel_bmmul, h1_weights, input_nodes, h1_nodes, NODE_COUNT[HIDDEN_1], BATCH_SIZE, NODE_COUNT[INPUT], BATCH_SIZE);
     err = Matrix::Multiply(
         kernel_mmul,
         input_nodes, h1_weights, h1_nodes,
@@ -108,28 +86,11 @@ cl_int NeuralNetwork::GetOutputs(
         WorkSize::Global::IH1, WorkSize::Local::IH1
     );
 
-    // std::cout << "Before biases.\n";
-    // float array_verify[BxH1];
-    // Matrix::Transfer(h1_nodes, array_verify, BxH1 * sizeof(float));
-    // std::cout << "\n";
-    // for (size_t i = 0; i < BxH1; i++) {
-    //     std::cout << " " << array_verify[i];
-    // }
-    // std::cout << "\n\n";
-
     err |= Matrix::Add(
         kernel_madd,
         h1_nodes, h1_biases, h1_nodes,
         BxH1
     );
-
-    // std::cout << "Before ReLU.\n";
-    // Matrix::Transfer(h1_nodes, array_verify, BxH1 * sizeof(float));
-    // std::cout << "\n";
-    // for (size_t i = 0; i < BxH1; i++) {
-    //     std::cout << " " << array_verify[i];
-    // }
-    // std::cout << "\n\n";
 
     err |= Activation::ReLU(kernel_actv, h1_nodes, BxH1);
 
@@ -138,15 +99,6 @@ cl_int NeuralNetwork::GetOutputs(
         return err;
     }
 
-    // std::cout << "After ReLU.\n";
-    // Matrix::Transfer(h1_nodes, array_verify, BxH1 * sizeof(float));
-    // std::cout << "\n";
-    // for (size_t i = 0; i < BxH1; i++) {
-    //     std::cout << " " << array_verify[i];
-    // }
-    // std::cout << "\n\n";
-
-    // err = Matrix::BatchedMultiply(kernel_bmmul, h2_weights, h1_nodes, h2_nodes, NODE_COUNT[HIDDEN_2], BATCH_SIZE, NODE_COUNT[HIDDEN_1], BATCH_SIZE);
     err = Matrix::Multiply(
         kernel_mmul,
         h1_nodes, h2_weights, h2_nodes,
@@ -167,7 +119,6 @@ cl_int NeuralNetwork::GetOutputs(
         return err;
     }
 
-    // err = Matrix::BatchedMultiply(kernel_bmmul, output_weights, h2_nodes, output_nodes, NODE_COUNT[OUTPUT], BATCH_SIZE, NODE_COUNT[HIDDEN_2], BATCH_SIZE);
     err = Matrix::Multiply(
         kernel_mmul,
         h2_nodes, output_weights, output_nodes,

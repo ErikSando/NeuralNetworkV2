@@ -2,8 +2,6 @@
 
 #include "CL/cl.h"
 
-#define GPU 1
-
 constexpr std::string_view FILE_NAME(std::string_view path) {
     size_t last_slash = path.find_last_of("/\\");
     return last_slash == std::string_view::npos ? path : path.substr(last_slash + 1);

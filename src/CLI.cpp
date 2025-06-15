@@ -1,11 +1,16 @@
 #include <array>
+#include <chrono>
 #include <iostream>
 #include <sstream>
+#include <string.h>
 #include <vector>
 
 #include <ctime>
 #include <random>
 
+#include "Config.h"
+#include "DataParser.h"
+#include "FileInput.h"
 #include "Thing.h"
 #include "NeuralNetwork.h"
 
@@ -58,6 +63,35 @@ int CommandLoop() {
 
             for (size_t i = 0; i < BATCH_SIZE * NODE_COUNT[INPUT]; i++) {
                 inputs[i] = randf();// * 255;
+            }
+
+            network.GetOutputs(inputs, outputs);
+
+            // only the first set of output nodes are displayed
+            for (size_t i = 0; i < NODE_COUNT[OUTPUT]; i++) {
+                std::cout << i << ": " << outputs[i] << "\n";
+            }
+        }
+        else if (cmd == "idrand") {
+            std::array<ImageData, BATCH_SIZE> image_data;
+
+            DataParser::ParseBatch(1, "data/mnistdata/mnist_train.csv", image_data);
+
+            std::cout << "Digit: " << image_data[0].digit << "\n";
+
+            for (int row = 0; row < 28; row++) {
+                for (int col = 0; col < 28; col++) {
+                    std::cout << " " << (int) (255 * image_data[0].pixels[row * 28 + col]);
+                }
+
+                std::cout << "\n";
+            }
+
+            std::array<float, BxI> inputs;
+            std::array<float, BxO> outputs;
+
+            for (size_t i = 0; i < BATCH_SIZE; i++) {
+                memcpy(image_data[i].pixels.begin(), inputs.begin() + i * NODE_COUNT[INPUT], NODE_COUNT[INPUT] * sizeof(float));
             }
 
             network.GetOutputs(inputs, outputs);
