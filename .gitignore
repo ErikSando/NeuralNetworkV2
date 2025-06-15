@@ -1,2 +1,3 @@
 .vscode/
-data/mnistdata/mnist_train.csv
+res/mnistdata/mnist_train.csv
+bin/

@@ -18,6 +18,31 @@ float randf() {
     return (float) rand() / (float) RAND_MAX;
 }
 
+int num_characters(int n) {
+    if (n == 0) return 1;
+
+    return (n > 0 ? 1 : 2) + std::floor(std::log10(std::abs(n)));
+}
+
+void PrintData(ImageData& data, int spacing = 4) {
+    std::cout << "Digit: " << data.digit << std::endl;
+
+    for (int r = 0; r < 28; r++) {
+        for (int c = 0; c < 28; c++) {
+            int pixel = (float) (data.pixels[r * 28 + c]) * 255.0f;
+            int n_digits = num_characters(pixel);
+
+            for (int i = 0; i < spacing - n_digits; i++) {
+                std::cout << " ";
+            }
+
+            std::cout << pixel;
+        }
+
+        std::cout << std::endl;
+    }
+}
+
 int CommandLoop() {
     srand(time(nullptr));
 
@@ -75,17 +100,9 @@ int CommandLoop() {
         else if (cmd == "idrand") {
             std::array<ImageData, BATCH_SIZE> image_data;
 
-            DataParser::ParseBatch(1, "data/mnistdata/mnist_train.csv", image_data);
+            DataParser::ParseBatch(1, "res/mnistdata/mnist_train.csv", image_data);
 
-            std::cout << "Digit: " << image_data[0].digit << "\n";
-
-            for (int row = 0; row < 28; row++) {
-                for (int col = 0; col < 28; col++) {
-                    std::cout << " " << (int) (255 * image_data[0].pixels[row * 28 + col]);
-                }
-
-                std::cout << "\n";
-            }
+            PrintData(image_data[0]);
 
             std::array<float, BxI> inputs;
             std::array<float, BxO> outputs;
