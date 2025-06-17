@@ -1,3 +1,6 @@
 .vscode/
 res/mnistdata/mnist_train.csv
+res/mnistdata/mnist_test.csv
+res/mnistdata/fashion_train.csv
+res/mnistdata/fashion_test.csv
 bin/

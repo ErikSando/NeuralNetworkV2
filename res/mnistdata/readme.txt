@@ -1,4 +1,4 @@
-* mnist_train.csv has been added to .gitignore as it is larger than 100MB
+* Files have been added to .gitignore due to large size
 
 MNIST data in CSV format
 Taken from

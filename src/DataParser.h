@@ -10,5 +10,10 @@ struct ImageData {
 };
 
 namespace DataParser {
-    void ParseBatch(const size_t start_line, const char* filepath, std::array<ImageData, BATCH_SIZE>& output);
+    void ParseBatch(
+        const size_t start_line,
+        const char* filepath,
+        std::array<ImageData, BATCH_SIZE>& output,
+        const bool testing = false
+    );
 }

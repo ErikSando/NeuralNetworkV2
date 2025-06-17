@@ -9,9 +9,9 @@
 #include <iostream>
 
 namespace DataParser {
-    void ParseBatch(const size_t start_line, const char* filepath, std::array<ImageData, BATCH_SIZE>& output) {
+    void ParseBatch(const size_t start_line, const char* filepath, std::array<ImageData, BATCH_SIZE>& output, const bool testing) {
         for (size_t i = 0; i < BATCH_SIZE; i++) {
-            size_t line = (start_line + i - 1) % TRAINING_ROWS + 1;
+            size_t line = (start_line + i) % (testing ? TESTING_ROWS : TRAINING_ROWS) + 1;
 
             std::string raw_text = FileInput::ReadLine(line, filepath);
             std::string current_val = "";

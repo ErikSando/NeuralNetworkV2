@@ -7,6 +7,11 @@
 #include "Config.h"
 #include "Kernel.h"
 
+struct TestData {
+    int correct;
+    int incorrect;
+};
+
 class NeuralNetwork {
     public:
 
@@ -20,6 +25,8 @@ class NeuralNetwork {
         const std::array<float, BxI>& inputs,
         std::array<float, BxO>& outputs
     );
+
+    void Test(TestData& data, int samples);
 
     cl_mem h1_nodes;
     cl_mem h2_nodes;
@@ -38,4 +45,7 @@ class NeuralNetwork {
     Kernel* kernel_bmmul;
     Kernel* kernel_madd;
     Kernel* kernel_actv;
+
+    int testing_row = 0;
+    int training_row = 0;
 };

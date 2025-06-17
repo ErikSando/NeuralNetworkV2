@@ -86,14 +86,14 @@ int CommandLoop() {
             std::array<float, BxI> inputs;
             std::array<float, BxO> outputs;
 
-            for (size_t i = 0; i < BATCH_SIZE * NODE_COUNT[INPUT]; i++) {
+            for (size_t i = 0; i < BATCH_SIZE * N_INP; i++) {
                 inputs[i] = randf();// * 255;
             }
 
             network.GetOutputs(inputs, outputs);
 
             // only the first set of output nodes are displayed
-            for (size_t i = 0; i < NODE_COUNT[OUTPUT]; i++) {
+            for (size_t i = 0; i < N_OUT; i++) {
                 std::cout << i << ": " << outputs[i] << "\n";
             }
         }
@@ -108,14 +108,34 @@ int CommandLoop() {
             std::array<float, BxO> outputs;
 
             for (size_t i = 0; i < BATCH_SIZE; i++) {
-                memcpy(image_data[i].pixels.begin(), inputs.begin() + i * NODE_COUNT[INPUT], NODE_COUNT[INPUT] * sizeof(float));
+                memcpy(image_data[i].pixels.begin(), inputs.begin() + i * N_INP, N_INP * sizeof(float));
             }
 
             network.GetOutputs(inputs, outputs);
 
-            for (size_t i = 0; i < NODE_COUNT[OUTPUT]; i++) {
+            for (size_t i = 0; i < N_OUT; i++) {
                 std::cout << i << ": " << outputs[i] << "\n";
             }
+        }
+        else if (cmd == "test") {
+            std::cout << "Testing...\n";
+            
+            TestData test_data;
+
+            auto start = std::chrono::high_resolution_clock::now();
+
+            network.Test(test_data, static_cast<int>(TESTING_ROWS / BATCH_SIZE));
+
+            auto end = std::chrono::high_resolution_clock::now();
+            auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+
+            int correct = test_data.correct;
+            int incorrect = test_data.incorrect;
+
+            float accuracy = 100 * static_cast<float>(correct) / static_cast<float>(correct + incorrect);
+
+            std::cout << "Testing complete in " << duration << " ms.\n";
+            std::cout << "Accuracy: " << accuracy << "% (" << correct << "/" << (correct + incorrect) << ")\n";
         }
     }
 

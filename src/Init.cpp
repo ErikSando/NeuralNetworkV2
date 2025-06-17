@@ -57,6 +57,7 @@ namespace CL {
 
         if (!context) {
             std::cout << "clCreateContext error: " << err << " (" << FILE_NAME(__FILE__) << " > CL::Init)\n";
+            clReleaseContext(context);
             return 1;
         }
 
@@ -64,6 +65,7 @@ namespace CL {
 
         if (!command_queue) {
             std::cout << "clCreateCommandQueue error: " << err << " (" << FILE_NAME(__FILE__) << " > CL::Init)\n";
+            Destroy();
             return 1;
         }
 

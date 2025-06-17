@@ -1,4 +1,5 @@
 #include <cmath>
+
 #include <iostream>
 
 #include "CL/cl.h"
@@ -32,7 +33,7 @@ NeuralNetwork::NeuralNetwork() {
     Kernel kernel_rand(MAT_KRNL_PATH, "Randomise");
     Kernel kernel_populate(MAT_KRNL_PATH, "Populate");
 
-    float weight_max = std::sqrt(2.0f / static_cast<float>(NODE_COUNT[INPUT]));
+    float weight_max = std::sqrt(2.0f / static_cast<float>(N_INP));
     float weight_min = -weight_max;
 
     Matrix::Randomise(&kernel_rand, h1_weights, IxH1, weight_min, weight_max);
@@ -82,7 +83,7 @@ cl_int NeuralNetwork::GetOutputs(
     err = Matrix::Multiply(
         kernel_mmul,
         input_nodes, h1_weights, h1_nodes,
-        BATCH_SIZE, NODE_COUNT[HIDDEN_1], NODE_COUNT[INPUT],
+        BATCH_SIZE, N_H1, N_INP,
         WorkSize::Global::IH1, WorkSize::Local::IH1
     );
 
@@ -102,7 +103,7 @@ cl_int NeuralNetwork::GetOutputs(
     err = Matrix::Multiply(
         kernel_mmul,
         h1_nodes, h2_weights, h2_nodes,
-        BATCH_SIZE, NODE_COUNT[HIDDEN_2], NODE_COUNT[HIDDEN_1],
+        BATCH_SIZE, N_H2, N_H1,
         WorkSize::Global::H1H2, WorkSize::Local::H1H2
     );
 
@@ -122,7 +123,7 @@ cl_int NeuralNetwork::GetOutputs(
     err = Matrix::Multiply(
         kernel_mmul,
         h2_nodes, output_weights, output_nodes,
-        BATCH_SIZE, NODE_COUNT[OUTPUT], NODE_COUNT[HIDDEN_2],
+        BATCH_SIZE, N_OUT, N_H2,
         WorkSize::Global::H2O, WorkSize::Local::H2O
     );
 
@@ -151,7 +152,7 @@ cl_int NeuralNetwork::GetOutputs(
         return err;
     }
 
-    Activation::Softmax(int_output_nodes, outputs.data(), NODE_COUNT[OUTPUT], BATCH_SIZE);
+    Activation::Softmax(int_output_nodes, outputs.data(), N_OUT, BATCH_SIZE);
 
     return CL_SUCCESS;
 }
