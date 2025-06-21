@@ -1,19 +1,18 @@
 // This isn't being used currently
 
-#define N_OUT 10
-
 __kernel void CheckOutputs(
     __global const float* outputs,
     __global const int* digits,
-    __global int* test_data
+    __global int* test_data,
+    const int n_outputs
 ) {
     int batch_idx = get_global_id(0);
-    int index = batch_idx * N_OUT;
+    int index = batch_idx * n_outputs;
 
     float max = 0.0f;
     int digit = -1;
 
-    for (int i = 0; i < N_OUT; i++) {
+    for (int i = 0; i < n_outputs; i++) {
         float output = outputs[index + i];
 
         if (output > max) {

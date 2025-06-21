@@ -114,8 +114,8 @@ namespace Matrix {
      * size - number of bytes to copy
      */
     template<typename T>
-    cl_int Transfer(T* dest, cl_mem& src, size_t size) {
-        cl_int err = clEnqueueWriteBuffer(CL::command_queue, src, CL_TRUE, 0, size, (void*) dest, 0, nullptr, nullptr);
+    cl_int Transfer(T* src, cl_mem& dest, size_t size) {
+        cl_int err = clEnqueueWriteBuffer(CL::command_queue, dest, CL_TRUE, 0, size, (void*) src, 0, nullptr, nullptr);
 
         if (err != CL_SUCCESS) {
             std::cout << "Failed to write into device buffer: " << err << " (" << FILE_NAME(__FILE__) << " > Matrix::Transfer)\n";

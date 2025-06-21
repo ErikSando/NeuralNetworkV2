@@ -6,8 +6,6 @@
 #include "Matrix.h"
 #include "NeuralNetwork.h"
 
-#define nullf ((float*) nullptr)
-
 NeuralNetwork::NeuralNetwork() {
     srand(time(nullptr));
 
@@ -17,6 +15,7 @@ NeuralNetwork::NeuralNetwork() {
     kernel_mscale = new Kernel(MAT_KRNL_PATH, "Scale");
     kernel_actv = new Kernel(ACTV_KRNL_PATH, "ReLU");
     kernel_oactv = new Kernel(ACTV_KRNL_PATH, "Softmax");
+    kernel_bwp = new Kernel(BWP_KRNL_PATH, "BackwardPass");
 
     Matrix::Create(nullf, h1_nodes, BxH1);
     Matrix::Create(nullf, h2_nodes, BxH2);

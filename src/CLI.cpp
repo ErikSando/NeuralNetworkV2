@@ -98,7 +98,6 @@ int CommandLoop() {
             PrintData(image_data[0]);
 
             std::array<float, BxI> inputs;
-            float outputs[BxO];
 
             for (size_t i = 0; i < BATCH_SIZE; i++) {
                 memcpy(image_data[i].pixels.begin(), inputs.begin() + i * N_INP, N_INP * sizeof(float));
@@ -106,6 +105,7 @@ int CommandLoop() {
 
             network.GetOutputs(inputs);
 
+            float outputs[BxO];
             Matrix::Transfer(network.output_nodes, outputs, N_OUT * sizeof(float));
 
             for (size_t i = 0; i < N_OUT; i++) {
@@ -133,7 +133,7 @@ int CommandLoop() {
 
             auto start = std::chrono::high_resolution_clock::now();
 
-            network.Test(test_data, batches);
+            network.Test(test_data, batches); // doesn't matter if it fails
 
             auto end = std::chrono::high_resolution_clock::now();
             auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();

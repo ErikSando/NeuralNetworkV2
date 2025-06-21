@@ -7,6 +7,8 @@
 #include "Config.h"
 #include "Kernel.h"
 
+#define nullf ((float*) nullptr)
+
 struct TestData {
     int correct;
     int incorrect;
@@ -20,25 +22,28 @@ class NeuralNetwork {
 
     // used when the output is to be sent to the CPU
     cl_int GetOutputs(
+        const cl_mem& inputs,
+        std::array<float, BxO>& outputs
+    );
+
+    cl_int GetOutputs(
         const std::array<float, BxI>& inputs,
         std::array<float, BxO>& outputs
     );
 
+    cl_int GetOutputs(const cl_mem& inputs);
     cl_int GetOutputs(const std::array<float, BxI>& inputs);
 
-    void Train(const size_t epochs);
-    void Test(TestData& test_data, int batches);
+    cl_int Train(const size_t epochs);
+    cl_int Test(TestData& test_data, int batches);
 
     float learning_rate = 0.005f;
 
     int testing_row = 0;
     int training_row = 0;
 
-    // private:
-
-    cl_int ForwardPass(const std::array<float, BxI>& inputs);
-
-    //void CheckOutputs(cl_mem& test_data);
+    cl_int ForwardPass(const cl_mem& inputs);
+    cl_int BackwardPass(const cl_mem& inputs, int* digits);
 
     cl_mem h1_nodes;
     cl_mem h2_nodes;
@@ -58,4 +63,5 @@ class NeuralNetwork {
     Kernel* kernel_madd;
     Kernel* kernel_actv;
     Kernel* kernel_oactv; // output activation
+    Kernel* kernel_bwp; // backward pass
 };

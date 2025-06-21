@@ -13,6 +13,10 @@ class Kernel {
         return clSetKernelArg(clkernel, index, sizeof(T), &value);
     }
 
+    cl_int SetArgumentArray(cl_uint index, const int size) {
+        return clSetKernelArg(clkernel, index, size, nullptr);
+    }
+
     cl_program clprogram;
     cl_kernel clkernel;
 };

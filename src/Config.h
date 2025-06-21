@@ -12,6 +12,7 @@ constexpr const char* TEST_DATA_PATH = "res/mnistdata/mnist_test.csv";
 
 constexpr const char* MAT_KRNL_PATH = "src/MatrixKernel.cl";
 constexpr const char* ACTV_KRNL_PATH = "src/ActivationKernel.cl";
+constexpr const char* BWP_KRNL_PATH = "src/TrainKernel.cl";
 
 constexpr size_t BATCH_SIZE = 32;
 constexpr size_t NODE_COUNT[4] = { 28 * 28, 128, 64, 10 };
@@ -45,6 +46,7 @@ namespace WorkSize {
         constexpr size_t IH1[2] = { LWS, LWS };
         constexpr size_t H1H2[2] = { LWS, LWS };
         constexpr size_t H2O[2] = { LWS, LWS };
+        constexpr size_t BWP[2] = { 2, 2 };
     }
     
     namespace Global {
@@ -61,6 +63,11 @@ namespace WorkSize {
         constexpr size_t H2O[2] = { // water reference?
             round_up(Local::H2O[0], N_OUT),
             round_up(Local::H2O[1], BATCH_SIZE)
+        };
+
+        constexpr size_t BWP[2] = {
+            round_up(Local::BWP[0], N_OUT),
+            round_up(Local::BWP[0], BATCH_SIZE)
         };
     }
 }
