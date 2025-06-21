@@ -1,34 +1,35 @@
 #include <cmath>
+#include <ctime>
+#include <random>
 
-#include <iostream>
-
-#include "CL/cl.h"
-
-#include "Activation.h"
 #include "Config.h"
 #include "Matrix.h"
 #include "NeuralNetwork.h"
-#include "Thing.h"
+
+#define nullf ((float*) nullptr)
 
 NeuralNetwork::NeuralNetwork() {
+    srand(time(nullptr));
+
     kernel_mmul = new Kernel(MAT_KRNL_PATH, "Multiply");
     kernel_bmmul = new Kernel(MAT_KRNL_PATH, "MultiplyBatched");
     kernel_madd = new Kernel(MAT_KRNL_PATH, "Add");
     kernel_mscale = new Kernel(MAT_KRNL_PATH, "Scale");
     kernel_actv = new Kernel(ACTV_KRNL_PATH, "ReLU");
+    kernel_oactv = new Kernel(ACTV_KRNL_PATH, "Softmax");
 
-    Matrix::Create(nullptr, h1_nodes, BxH1);
-    Matrix::Create(nullptr, h2_nodes, BxH2);
-    Matrix::Create(nullptr, output_nodes, BxO);
+    Matrix::Create(nullf, h1_nodes, BxH1);
+    Matrix::Create(nullf, h2_nodes, BxH2);
+    Matrix::Create(nullf, output_nodes, BxO);
 
-    Matrix::Create(nullptr, h1_weights, IxH1);
-    Matrix::Create(nullptr, h2_weights, H1xH2);
-    Matrix::Create(nullptr, output_weights, H2xO);
+    Matrix::Create(nullf, h1_weights, IxH1);
+    Matrix::Create(nullf, h2_weights, H1xH2);
+    Matrix::Create(nullf, output_weights, H2xO);
 
     // One row is repeated for each batch, there is probably a better way to do this but I will leave it for now
-    Matrix::Create(nullptr, h1_biases, BxH1);
-    Matrix::Create(nullptr, h2_biases, BxH2);
-    Matrix::Create(nullptr, output_biases, BxO);
+    Matrix::Create(nullf, h1_biases, BxH1);
+    Matrix::Create(nullf, h2_biases, BxH2);
+    Matrix::Create(nullf, output_biases, BxO);
 
     Kernel kernel_rand(MAT_KRNL_PATH, "Randomise");
     Kernel kernel_populate(MAT_KRNL_PATH, "Populate");
@@ -62,97 +63,4 @@ NeuralNetwork::~NeuralNetwork() {
     delete kernel_bmmul;
     delete kernel_madd;
     delete kernel_actv;
-}
-
-// I am considering changing the arguments to const float* inputs, float* outputs
-cl_int NeuralNetwork::GetOutputs(
-    const std::array<float, BxI>& inputs,
-    std::array<float, BxO>& outputs
-) {
-    // this stuff with the inputs should probably be done by the function caller prior to the function call
-    cl_int err;
-    cl_mem input_nodes;
-
-    err = Matrix::Create(inputs.data(), input_nodes, BxI);
-
-    if (err != CL_SUCCESS) {
-        std::cout << "Failed to create input matrix: " << err << " (" << FILE_NAME(__FILE__) << " > NeuralNetwork::GetOutputs)\n";
-        return err;
-    }
-
-    err = Matrix::Multiply(
-        kernel_mmul,
-        input_nodes, h1_weights, h1_nodes,
-        BATCH_SIZE, N_H1, N_INP,
-        WorkSize::Global::IH1, WorkSize::Local::IH1
-    );
-
-    err |= Matrix::Add(
-        kernel_madd,
-        h1_nodes, h1_biases, h1_nodes,
-        BxH1
-    );
-
-    err |= Activation::ReLU(kernel_actv, h1_nodes, BxH1);
-
-    if (err != CL_SUCCESS) {
-        std::cout << "Failed to compute hidden layer 1 nodes: " << err << " (" << FILE_NAME(__FILE__) << " > NeuralNetwork::GetOutputs)\n";
-        return err;
-    }
-
-    err = Matrix::Multiply(
-        kernel_mmul,
-        h1_nodes, h2_weights, h2_nodes,
-        BATCH_SIZE, N_H2, N_H1,
-        WorkSize::Global::H1H2, WorkSize::Local::H1H2
-    );
-
-    err |= Matrix::Add(
-        kernel_madd,
-        h2_nodes, h2_biases, h2_nodes,
-        BxH2
-    );
-
-    err |= Activation::ReLU(kernel_actv, h2_nodes, BxH1);
-
-    if (err != CL_SUCCESS) {
-        std::cout << "Failed to compute hidden layer 2 nodes: " << err << " (" << FILE_NAME(__FILE__) << " > NeuralNetwork::GetOutputs)\n";
-        return err;
-    }
-
-    err = Matrix::Multiply(
-        kernel_mmul,
-        h2_nodes, output_weights, output_nodes,
-        BATCH_SIZE, N_OUT, N_H2,
-        WorkSize::Global::H2O, WorkSize::Local::H2O
-    );
-
-    err |= Matrix::Add(
-        kernel_madd,
-        output_nodes, output_biases, output_nodes,
-        BxO
-    );
-
-    if (err != CL_SUCCESS) {
-        std::cout << "Failed to compute output nodes: " << err << " (" << FILE_NAME(__FILE__) << " > NeuralNetwork::GetOutputs)\n";
-        return err;
-    }
-
-    // there might be a better way to do this
-    float int_output_nodes[BxO]; // intermediate output nodes, i think it makes sense to name it that
-    
-    err = Matrix::Transfer(
-        output_nodes,
-        int_output_nodes,
-        BxO * sizeof(float)
-    );
-
-    if (err != CL_SUCCESS) {
-        std::cout << "Failed to read into intermediate output array: " << err << " (" << FILE_NAME(__FILE__) << " > NeuralNetwork::GetOutputs)\n";
-        return err;
-    }
-
-    Activation::Softmax(int_output_nodes, outputs.data(), N_OUT, BATCH_SIZE);
-
-    return CL_SUCCESS;
 }

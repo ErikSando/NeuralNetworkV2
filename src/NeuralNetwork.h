@@ -18,15 +18,27 @@ class NeuralNetwork {
     NeuralNetwork();
     ~NeuralNetwork();
 
-    // void Train(int epochs);
-    // void Test(int samples);
-
+    // used when the output is to be sent to the CPU
     cl_int GetOutputs(
         const std::array<float, BxI>& inputs,
         std::array<float, BxO>& outputs
     );
 
-    void Test(TestData& data, int samples);
+    cl_int GetOutputs(const std::array<float, BxI>& inputs);
+
+    void Train(const size_t epochs);
+    void Test(TestData& test_data, int batches);
+
+    float learning_rate = 0.005f;
+
+    int testing_row = 0;
+    int training_row = 0;
+
+    // private:
+
+    cl_int ForwardPass(const std::array<float, BxI>& inputs);
+
+    //void CheckOutputs(cl_mem& test_data);
 
     cl_mem h1_nodes;
     cl_mem h2_nodes;
@@ -45,7 +57,5 @@ class NeuralNetwork {
     Kernel* kernel_bmmul;
     Kernel* kernel_madd;
     Kernel* kernel_actv;
-
-    int testing_row = 0;
-    int training_row = 0;
+    Kernel* kernel_oactv; // output activation
 };

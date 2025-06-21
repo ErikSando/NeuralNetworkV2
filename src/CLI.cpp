@@ -1,18 +1,18 @@
 #include <array>
 #include <chrono>
+#include <cmath>
 #include <iostream>
 #include <sstream>
 #include <string.h>
 #include <vector>
-
-#include <ctime>
-#include <random>
 
 #include "Config.h"
 #include "DataParser.h"
 #include "FileInput.h"
 #include "Thing.h"
 #include "NeuralNetwork.h"
+
+#include "Matrix.h"
 
 float randf() {
     return (float) rand() / (float) RAND_MAX;
@@ -44,18 +44,6 @@ void PrintData(ImageData& data, int spacing = 4) {
 }
 
 int CommandLoop() {
-    srand(time(nullptr));
-
-    // Kernel kernel_mmul("src/MatrixKernel.cl", "MatrixMultiply");
-    // Kernel kernel_bmmul("src/MatrixKernel.cl", "BatchedMatrixMultiply");
-    // Kernel kernel_madd("src/MatrixKernel.cl", "MatrixAdd");
-    // Kernel kernel_actv("src/ActivationKernel.cl", "ReLU");
-
-    // if (!kernel_mmul.clkernel || !kernel_bmmul.clkernel || !kernel_madd.clkernel || !kernel_actv.clkernel) {
-    //     std::cout << "Failed to create kernel (" << FILE_NAME(__FILE__) << ")\n";
-    //     return 1;
-    // }
-
     NeuralNetwork network;
 
     std::string command;
@@ -74,13 +62,16 @@ int CommandLoop() {
 
         if (args.size() < 1) continue;
 
-        std::string& cmd = args.at(0);
+        std::string& cmd = args[0];
 
         if (cmd == "exit" || cmd == "quit") {
             break;
         }
         else if (cmd == "help") {
-            std::cout << "help:\n- Shows this menu.\n";
+            std::cout << "help\n - Shows this menu.\n";
+            std::cout << "train [no. epochs]\n - Train the network with the specified number of epochs. One epoch uses the entire training data set.\n";
+            std::cout << "test [no. batches]\n - Test the networks accuracy for the specified number of batches. Type 'all' to use the entire testing data set.\n";
+            // std::cout << "id [file path]\n - Identify a digit in a 28x28 drawing.\n";
         }
         else if (cmd == "getout") {
             std::array<float, BxI> inputs;
@@ -100,31 +91,49 @@ int CommandLoop() {
         else if (cmd == "idrand") {
             std::array<ImageData, BATCH_SIZE> image_data;
 
-            DataParser::ParseBatch(1, "res/mnistdata/mnist_train.csv", image_data);
+            int line = random() % TESTING_ROWS;
+
+            DataParser::ParseBatch(line, "res/mnistdata/mnist_test.csv", image_data);
 
             PrintData(image_data[0]);
 
             std::array<float, BxI> inputs;
-            std::array<float, BxO> outputs;
+            float outputs[BxO];
 
             for (size_t i = 0; i < BATCH_SIZE; i++) {
                 memcpy(image_data[i].pixels.begin(), inputs.begin() + i * N_INP, N_INP * sizeof(float));
             }
 
-            network.GetOutputs(inputs, outputs);
+            network.GetOutputs(inputs);
+
+            Matrix::Transfer(network.output_nodes, outputs, N_OUT * sizeof(float));
 
             for (size_t i = 0; i < N_OUT; i++) {
                 std::cout << i << ": " << outputs[i] << "\n";
             }
         }
         else if (cmd == "test") {
+            if (args.size() < 2) {
+                std::cout << "Incorrect usage\n";
+                std::cout << "Usage: train [no. batches]\n";
+                continue;
+            }
+
+            std::string& batches_arg = args[1];
+            int batches = 0;
+
+            if (batches_arg == "all") batches = TESTING_ROWS / BATCH_SIZE;
+            else batches = std::stoi(batches_arg);
+
+            if (!batches) continue;
+
             std::cout << "Testing...\n";
             
             TestData test_data;
 
             auto start = std::chrono::high_resolution_clock::now();
 
-            network.Test(test_data, static_cast<int>(TESTING_ROWS / BATCH_SIZE));
+            network.Test(test_data, batches);
 
             auto end = std::chrono::high_resolution_clock::now();
             auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();

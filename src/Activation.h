@@ -5,7 +5,9 @@
 #include "Kernel.h"
 
 namespace Activation {
-    cl_int ReLU(Kernel* kernel, cl_mem& mat, const size_t size);
+    cl_int ReLU(Kernel* kernel, cl_mem& mem, const size_t size);
 
-    void Softmax(const float* inp, float* out, const int C, const int batches);
+    cl_int Softmax(Kernel* kernel, cl_mem& mem, const size_t C, const int batches); // GPU
+    
+    void Softmax(float* mem, const int C, const int batches); // CPU
 }

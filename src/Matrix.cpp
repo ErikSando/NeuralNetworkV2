@@ -7,20 +7,20 @@
 #include "Thing.h"
 
 namespace Matrix {
-    cl_int Create(const float* host_mat, cl_mem& dev_mem, const size_t size) {
-        cl_int err;
+    // cl_int Create(const float* host_mat, cl_mem& dev_mem, const size_t size) {
+    //     cl_int err;
 
-        cl_mem_flags mem_flags = CL_MEM_READ_WRITE;
-        if (host_mat) mem_flags |= CL_MEM_COPY_HOST_PTR;
+    //     cl_mem_flags mem_flags = CL_MEM_READ_WRITE;
+    //     if (host_mat) mem_flags |= CL_MEM_COPY_HOST_PTR;
 
-        dev_mem = clCreateBuffer(CL::context, mem_flags, size * sizeof(float), (void*) host_mat, &err);
+    //     dev_mem = clCreateBuffer(CL::context, mem_flags, size * sizeof(float), (void*) host_mat, &err);
 
-        if (err != CL_SUCCESS || !dev_mem) {
-            std::cout << "Failed to allocate device memory: " << err << " (" << FILE_NAME(__FILE__) << " > Matrix::Create)\n";
-        }
+    //     if (err != CL_SUCCESS || !dev_mem) {
+    //         std::cout << "Failed to allocate device memory: " << err << " (" << FILE_NAME(__FILE__) << " > Matrix::Create)\n";
+    //     }
 
-        return err;
-    }
+    //     return err;
+    // }
 
     void Destroy(cl_mem& dev_mem) {
         if (dev_mem) {
@@ -166,15 +166,15 @@ namespace Matrix {
         return err;
     }
 
-    cl_int Transfer(cl_mem& src, float* dest, size_t size) {
-        cl_int err = clEnqueueReadBuffer(CL::command_queue, src, CL_TRUE, 0, size, (void*) dest, 0, nullptr, nullptr);
+    // cl_int Transfer(cl_mem& src, float* dest, size_t size) {
+    //     cl_int err = clEnqueueReadBuffer(CL::command_queue, src, CL_TRUE, 0, size, (void*) dest, 0, nullptr, nullptr);
 
-        if (err != CL_SUCCESS) {
-            std::cout << "Failed to read output array: " << err << " (" << FILE_NAME(__FILE__) << " > Matrix::Scale)\n";
-        }
+    //     if (err != CL_SUCCESS) {
+    //         std::cout << "Failed to read output array: " << err << " (" << FILE_NAME(__FILE__) << " > Matrix::Transfer)\n";
+    //     }
 
-        return err;
-    }
+    //     return err;
+    // }
 
     cl_int Populate(Kernel* kernel, cl_mem& mat, const size_t size, const float value) {
         cl_int err;

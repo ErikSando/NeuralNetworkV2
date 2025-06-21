@@ -1,8 +1,11 @@
 #pragma once
 
+#include <iostream>
+
 #include "CL/cl.h"
 
 #include "Kernel.h"
+#include "Thing.h"
 
 namespace Matrix {
     /**
@@ -11,7 +14,21 @@ namespace Matrix {
      * dev_mem - device memory to store the elements into
      * size - size of the matrix (rows * columns)
      */
-    cl_int Create(const float* host_mat, cl_mem& dev_mem, const size_t size);
+    template<typename T>
+    cl_int Create(const T* host_mat, cl_mem& dev_mem, const size_t size) {
+        cl_int err;
+
+        cl_mem_flags mem_flags = CL_MEM_READ_WRITE;
+        if (host_mat) mem_flags |= CL_MEM_COPY_HOST_PTR;
+
+        dev_mem = clCreateBuffer(CL::context, mem_flags, size * sizeof(T), (void*) host_mat, &err);
+
+        if (err != CL_SUCCESS || !dev_mem) {
+            std::cout << "Failed to allocate device memory: " << err << " (" << FILE_NAME(__FILE__) << " > Matrix::Create)\n";
+        }
+
+        return err;
+    }
 
     /**
      * Calls clReleaseMemObject on the passed device memory.
@@ -66,7 +83,7 @@ namespace Matrix {
     );
 
     /**
-     * Multiply the matrix by a scalar value
+     * Multiply the matrix by a scalar value, returns error code (0 means success)
      * mat - device memory of the matrix
      * size - size of the matrix (rows * columns)
      * k - scalar multiplier
@@ -74,15 +91,41 @@ namespace Matrix {
     cl_int Scale(Kernel* kernel, cl_mem& mat, const size_t size, const float k);
 
     /**
-     * Copy device memory buffer into host memory buffer
+     * Copy device memory buffer into host memory buffer, returns error code (0 means success)
      * src - device memory buffer
      * dest - host memory buffer
      * size - number of bytes to copy
      */
-    cl_int Transfer(cl_mem& src, float* dest, size_t size);
-    
+    template<typename T>
+    cl_int Transfer(cl_mem& src, T* dest, size_t size) {
+        cl_int err = clEnqueueReadBuffer(CL::command_queue, src, CL_TRUE, 0, size, (void*) dest, 0, nullptr, nullptr);
+
+        if (err != CL_SUCCESS) {
+            std::cout << "Failed to read into host buffer: " << err << " (" << FILE_NAME(__FILE__) << " > Matrix::Transfer)\n";
+        }
+
+        return err;
+    }
+
     /**
-     * Sets all values in the matrix to the specified number
+     * Copy host memory buffer into device memory buffer, returns error code (0 means success)
+     * src - host memory buffer
+     * dest - device memory buffer
+     * size - number of bytes to copy
+     */
+    template<typename T>
+    cl_int Transfer(T* dest, cl_mem& src, size_t size) {
+        cl_int err = clEnqueueWriteBuffer(CL::command_queue, src, CL_TRUE, 0, size, (void*) dest, 0, nullptr, nullptr);
+
+        if (err != CL_SUCCESS) {
+            std::cout << "Failed to write into device buffer: " << err << " (" << FILE_NAME(__FILE__) << " > Matrix::Transfer)\n";
+        }
+
+        return err;
+    }
+
+    /**
+     * Sets all values in the matrix to the specified number, returns error code (0 means success)
      * mat - device memory of the matrix
      * size - size of the matrix (rows * columns)
      * value - value to populate the matrix with
@@ -96,6 +139,7 @@ namespace Matrix {
     /**
      * Randomise each element in a matrix with a uniform distribution of floats in the range [min, max)
      * Optionally provide a random seed
+     * Returns error code (0 means success)
      * mat - device memory of the matrix
      * size - size of the matrix (rows * columns)
      * min - lower bound
