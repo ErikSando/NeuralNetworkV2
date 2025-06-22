@@ -1,18 +1,16 @@
-// This isn't being used currently
-
 __kernel void CheckOutputs(
     __global const float* outputs,
     __global const int* digits,
     __global int* test_data,
-    const int n_outputs
+    const int C
 ) {
-    int batch_idx = get_global_id(0);
-    int index = batch_idx * n_outputs;
+    int batch = get_global_id(0);
+    int index = batch * C;
 
-    float max = 0.0f;
+    float max = -2000000000.0f;
     int digit = -1;
 
-    for (int i = 0; i < n_outputs; i++) {
+    for (int i = 0; i < C; i++) {
         float output = outputs[index + i];
 
         if (output > max) {
@@ -21,8 +19,6 @@ __kernel void CheckOutputs(
         }
     }
 
-    // if (digit == digits[batch_idx]) test_data[0]++;
-    // else test_data[1]++;
-
-    test_data[1]++;
+    if (digit == digits[batch]) atomic_inc(&test_data[0]);
+    else atomic_inc(&test_data[1]);
 }

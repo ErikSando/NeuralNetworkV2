@@ -23,7 +23,7 @@ namespace CL {
         err = clGetPlatformIDs(0, nullptr, &num_platforms);
 
         if (err != CL_SUCCESS) {
-            std::cout << "clGetPlatformIDs error: " << err << " (" << FILE_NAME(__FILE__) << " > CL::Init)\n";
+            ERROR_CL("Failed to get platform IDs", err);
             return 1;
         }
 
@@ -32,7 +32,7 @@ namespace CL {
         err = clGetPlatformIDs(num_platforms, platform_ids, nullptr);
 
         if (err != CL_SUCCESS) {
-            std::cout << "clGetPlatformIDs error: " << err << " (" << FILE_NAME(__FILE__) << " > CL::Init)\n";
+            ERROR_CL("Failed to get platform IDs", err);
             return 1;
         }
 
@@ -43,7 +43,7 @@ namespace CL {
         err = clGetDeviceIDs(platform_ids[0], GPU ? CL_DEVICE_TYPE_GPU : CL_DEVICE_TYPE_CPU, 1, &device_id, nullptr);
 
         if (err != CL_SUCCESS) {
-            std::cout << "clGetDeviceIDs error: " << err << " (" << FILE_NAME(__FILE__) << " > CL::Init)\n";
+            ERROR_CL("Failed to get device IDs", err);
             return 1;
         }
 
@@ -56,7 +56,7 @@ namespace CL {
         context = clCreateContext(nullptr, 1, &device_id, nullptr, nullptr, &err);
 
         if (!context) {
-            std::cout << "clCreateContext error: " << err << " (" << FILE_NAME(__FILE__) << " > CL::Init)\n";
+            ERROR_CL("Failed to create context", err);
             clReleaseContext(context);
             return 1;
         }
@@ -64,7 +64,7 @@ namespace CL {
         command_queue = clCreateCommandQueue(context, device_id, 0, &err);
 
         if (!command_queue) {
-            std::cout << "clCreateCommandQueue error: " << err << " (" << FILE_NAME(__FILE__) << " > CL::Init)\n";
+            ERROR_CL("Failed to create command queue", err);
             Destroy();
             return 1;
         }
@@ -73,7 +73,7 @@ namespace CL {
     }
 
     void Destroy() {
-        clReleaseCommandQueue(command_queue);
-        clReleaseContext(context);
+        if (command_queue) clReleaseCommandQueue(command_queue);
+        if (context) clReleaseContext(context);
     }
 }

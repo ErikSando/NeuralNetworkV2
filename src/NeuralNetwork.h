@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <vector>
 
 #include "CL/cl.h"
 
@@ -12,6 +13,10 @@
 struct TestData {
     int correct;
     int incorrect;
+};
+
+enum KernelID {
+    MMUL, BMMUL, MADD, MSCALE, ACTV, OACTV, BWP
 };
 
 class NeuralNetwork {
@@ -57,11 +62,13 @@ class NeuralNetwork {
     cl_mem h2_biases;
     cl_mem output_biases;
 
-    Kernel* kernel_mscale;
-    Kernel* kernel_mmul;
-    Kernel* kernel_bmmul;
-    Kernel* kernel_madd;
-    Kernel* kernel_actv;
-    Kernel* kernel_oactv; // output activation
-    Kernel* kernel_bwp; // backward pass
+    std::vector<Kernel> kernels;
+
+    // Kernel* kernel_mmul;
+    // Kernel* kernel_bmmul;
+    // Kernel* kernel_madd;
+    // Kernel* kernel_mscale;
+    // Kernel* kernel_actv;
+    // Kernel* kernel_oactv; // output activation
+    // Kernel* kernel_bwp; // backward pass
 };

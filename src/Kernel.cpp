@@ -8,7 +8,7 @@
 #include "Kernel.h"
 #include "Thing.h"
 
-const char* read_file(const char* file_path) {
+char* read_file(const char* file_path) {
     std::ifstream file(file_path, std::ios::binary | std::ios::ate);
 
     if (!file.is_open()) {
@@ -32,43 +32,22 @@ const char* read_file(const char* file_path) {
     return buffer;
 }
 
-// std::string read_file(const char* file_path) {
-//     std::ifstream file(file_path);
-
-//     if (!file.is_open()) {
-//         std::cerr << "Cannot open file: " << file_path << std::endl;
-//         return "";
-//     }
-
-//     std::stringstream contents;
-//     contents << file.rdbuf();
-//     return contents.str();
-// }
-
 Kernel::Kernel(const char* kernel_path, const char* name) {
-    const char* kernel_src = read_file(kernel_path);
+    char* kernel_src = read_file(kernel_path);
 
-    // std::string kernel_src = "";
-    
-    // for (int i = 0; i < n_paths; i++) {
-    //     kernel_src += read_file(kernel_paths[i]);
-    // }
-
-    // if (kernel_src == "") {
     if (!kernel_src) {
-        std::cout << "Failed to read kernel sources (Kernel::Kernel)\n";
+        ERROR("Failed to read kernel sources");
         return;
     }
 
-    // const char* ksrc = kernel_src.c_str();
-
     cl_int err;
 
-    // clprogram = clCreateProgramWithSource(CL::context, 1, &ksrc, nullptr, &err);
-    clprogram = clCreateProgramWithSource(CL::context, 1, &kernel_src, nullptr, &err);
+    clprogram = clCreateProgramWithSource(CL::context, 1, (const char**) &kernel_src, nullptr, &err);
+
+    delete[] kernel_src;
 
     if (!clprogram) {
-        std::cout << "Failed to create compute program: " << err << " (" << FILE_NAME(__FILE__) << " > Kernel::Kernel)\n";
+        ERROR_CL("Failed to create compute program", err);
         return;
     }
 
@@ -78,7 +57,7 @@ Kernel::Kernel(const char* kernel_path, const char* name) {
         // size_t length;
         // char buffer[2048];
         // clGetProgramBuildInfo(clprogram, CL::device_id, CL_PROGRAM_BUILD_LOG, sizeof(buffer), buffer, &length);
-        std::cout << "Failed to build program executible: " << err << " (" << FILE_NAME(__FILE__) << " > Kernel::Kernel)\n";
+        ERROR_CL("Failed to build program executible", err);
         // std::cout << buffer << "\n";
         return;
     }
@@ -86,12 +65,33 @@ Kernel::Kernel(const char* kernel_path, const char* name) {
     clkernel = clCreateKernel(clprogram, name, &err);
 
     if (!clkernel || err != CL_SUCCESS) {
-        std::cout << "Failed to create compute kernel: " << err << " (" << FILE_NAME(__FILE__) << " > Kernel::Kernel)\n";
+        ERROR_CL("Failed to create compute kernel", err);
         return;
     }
 }
 
 Kernel::~Kernel() {
-    clReleaseKernel(clkernel);
-    clReleaseProgram(clprogram);
+    if (clkernel) clReleaseKernel(clkernel);
+    if (clprogram) clReleaseProgram(clprogram);
+}
+
+Kernel::Kernel(Kernel&& other) noexcept {
+    clkernel = other.clkernel;
+    clprogram = other.clprogram;
+    other.clkernel = nullptr;
+    other.clprogram = nullptr;
+}
+
+Kernel& Kernel::operator=(Kernel&& other) noexcept {
+    if (this != &other) {
+        if (clkernel) clReleaseKernel(clkernel);
+        if (clprogram) clReleaseProgram(clprogram);
+
+        clkernel = other.clkernel;
+        clprogram = other.clprogram;
+        other.clkernel = nullptr;
+        other.clprogram = nullptr;
+    }
+
+    return *this;
 }

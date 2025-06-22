@@ -7,6 +7,12 @@ constexpr std::string_view FILE_NAME(std::string_view path) {
     return last_slash == std::string_view::npos ? path : path.substr(last_slash + 1);
 }
 
+#define ERROR_CL(msg, err)\
+    std::cout << msg << ": " << err << " (" << FILE_NAME(__FILE__) << " line " << __LINE__ << ")\n";
+
+#define ERROR(msg)\
+    std::cout << msg << " (" << FILE_NAME(__FILE__) << " line " << __LINE__ << ")\n";
+
 namespace CL {
     extern cl_platform_id platform_ids[100];
     extern cl_device_id device_id;

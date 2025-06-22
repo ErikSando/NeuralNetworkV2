@@ -8,18 +8,20 @@ __kernel void LeakyReLU(__global float* M) {
     M[index] = M[index] >= 0 ? M[index] : 0.01 * M[index];
 }
 
-// I don't know how to make the length of the sum array change
-// depending on what N_OUT is in the host code, so I am using 10
-#define N_OUT 10
-
-__kernel void Softmax(__global float* M, const int start) {
+__kernel void Softmax(
+    __global float* M,
+    __local float* exponents,
+    const int C,
+    const int batch_size
+) {
     int index = get_global_id(0);
+    int batch = get_global_id(1);
 
-    __local float exponents[N_OUT + 1];
+    if (index >= C || batch >= batch_size) return;
 
-    exponents[index] = exp(M[index + start]);
+    exponents[index + batch * C] = exp(M[index + batch * C]);
 
-    barrier(CLK_LOCAL_MEM_FENCE);
+    barrier(CLK_GLOBAL_MEM_FENCE);
 
     float sum = 0.0f;
 
@@ -28,10 +30,10 @@ __kernel void Softmax(__global float* M, const int start) {
             sum += exponents[i];
         }
 
-        exponents[N_OUT] = sum;
+        exponents[batch_size * (C + 1)] = sum; // 32 elements at the end are the 32 sums
     }
 
-    barrier(CLK_LOCAL_MEM_FENCE);
+    barrier(CLK_GLOBAL_MEM_FENCE);
 
-    M[index + start] = exponents[index] / exponents[N_OUT];
+    M[index + batch * C] = exponents[index + batch * C] / exponents[batch_size * C + batch];
 }

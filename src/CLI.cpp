@@ -69,63 +69,75 @@ int CommandLoop() {
         }
         else if (cmd == "help") {
             std::cout << "help\n - Shows this menu.\n";
-            std::cout << "train [no. epochs]\n - Train the network with the specified number of epochs. One epoch uses the entire training data set.\n";
-            std::cout << "test [no. batches]\n - Test the networks accuracy for the specified number of batches. Type 'all' to use the entire testing data set.\n";
+            std::cout << "train [no. epochs]\n - Train the network with the specified number of epochs. One epoch uses the entire training data set. By default, one epoch is used.\n";
+            std::cout << "test [no. batches]\n - Test the networks accuracy for the specified number of batches. By default, the entire testing data set is used.\n";
             // std::cout << "id [file path]\n - Identify a digit in a 28x28 drawing.\n";
         }
-        else if (cmd == "getout") {
-            std::array<float, BxI> inputs;
-            std::array<float, BxO> outputs;
+        // else if (cmd == "getout") {
+        //     std::array<float, BxI> inputs;
+        //     std::array<float, BxO> outputs;
 
-            for (size_t i = 0; i < BATCH_SIZE * N_INP; i++) {
-                inputs[i] = randf();// * 255;
+        //     for (size_t i = 0; i < BATCH_SIZE * N_INP; i++) {
+        //         inputs[i] = randf();// * 255;
+        //     }
+
+        //     network.GetOutputs(inputs, outputs);
+
+        //     // only the first set of output nodes are displayed
+        //     for (size_t i = 0; i < N_OUT; i++) {
+        //         std::cout << i << ": " << outputs[i] << "\n";
+        //     }
+        // }
+        // else if (cmd == "idrand") {
+        //     std::array<ImageData, BATCH_SIZE> image_data;
+
+        //     int line = random() % TESTING_ROWS;
+
+        //     DataParser::ParseBatch(line, "res/mnistdata/mnist_test.csv", image_data);
+
+        //     PrintData(image_data[0]);
+
+        //     std::array<float, BxI> inputs;
+
+        //     for (size_t i = 0; i < BATCH_SIZE; i++) {
+        //         memcpy(image_data[i].pixels.begin(), inputs.begin() + i * N_INP, N_INP * sizeof(float));
+        //     }
+
+        //     network.GetOutputs(inputs);
+
+        //     float outputs[BxO];
+        //     Matrix::Transfer(network.output_nodes, outputs, N_OUT);
+
+        //     for (size_t i = 0; i < N_OUT; i++) {
+        //         std::cout << i << ": " << outputs[i] << "\n";
+        //     }
+        // }
+        else if (cmd == "train") {
+            size_t epochs = 1;
+
+            if (args.size() >= 2) {
+                epochs = std::stoul(args[1]);
+                if (!epochs) continue;
             }
 
-            network.GetOutputs(inputs, outputs);
+            std::cout << "Training...\n";
 
-            // only the first set of output nodes are displayed
-            for (size_t i = 0; i < N_OUT; i++) {
-                std::cout << i << ": " << outputs[i] << "\n";
-            }
-        }
-        else if (cmd == "idrand") {
-            std::array<ImageData, BATCH_SIZE> image_data;
+            auto start = std::chrono::high_resolution_clock::now();
 
-            int line = random() % TESTING_ROWS;
+            network.Train(epochs);
 
-            DataParser::ParseBatch(line, "res/mnistdata/mnist_test.csv", image_data);
+            auto end = std::chrono::high_resolution_clock::now();
+            auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 
-            PrintData(image_data[0]);
-
-            std::array<float, BxI> inputs;
-
-            for (size_t i = 0; i < BATCH_SIZE; i++) {
-                memcpy(image_data[i].pixels.begin(), inputs.begin() + i * N_INP, N_INP * sizeof(float));
-            }
-
-            network.GetOutputs(inputs);
-
-            float outputs[BxO];
-            Matrix::Transfer(network.output_nodes, outputs, N_OUT * sizeof(float));
-
-            for (size_t i = 0; i < N_OUT; i++) {
-                std::cout << i << ": " << outputs[i] << "\n";
-            }
+            std::cout << "Training complete in " << duration << " ms (" << epochs << " epoch/s)\n";
         }
         else if (cmd == "test") {
-            if (args.size() < 2) {
-                std::cout << "Incorrect usage\n";
-                std::cout << "Usage: train [no. batches]\n";
-                continue;
+            int batches = TESTING_ROWS / BATCH_SIZE;
+
+            if (args.size() >= 2) {
+                batches = std::stoi(args[1]);
+                if (!batches) continue;
             }
-
-            std::string& batches_arg = args[1];
-            int batches = 0;
-
-            if (batches_arg == "all") batches = TESTING_ROWS / BATCH_SIZE;
-            else batches = std::stoi(batches_arg);
-
-            if (!batches) continue;
 
             std::cout << "Testing...\n";
             
@@ -143,7 +155,7 @@ int CommandLoop() {
 
             float accuracy = 100 * static_cast<float>(correct) / static_cast<float>(correct + incorrect);
 
-            std::cout << "Testing complete in " << duration << " ms.\n";
+            std::cout << "Testing complete in " << duration << " ms (" << batches << " batches)\n";
             std::cout << "Accuracy: " << accuracy << "% (" << correct << "/" << (correct + incorrect) << ")\n";
         }
     }

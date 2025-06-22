@@ -23,13 +23,11 @@ namespace Matrix {
     // }
 
     void Destroy(cl_mem& dev_mem) {
-        if (dev_mem) {
-            clReleaseMemObject(dev_mem);
-        }
+        if (dev_mem) clReleaseMemObject(dev_mem);
     }
 
     cl_int Multiply(
-        Kernel* kernel,
+        Kernel& kernel,
         const cl_mem& dmA, const cl_mem& dmB, cl_mem& dmC,
         //float* C,
         const int M, const int N, const int K,
@@ -37,22 +35,22 @@ namespace Matrix {
     ) {
         cl_int err;
 
-        err = kernel->SetArgument<const cl_mem>(0, dmA);
-        err |= kernel->SetArgument<const cl_mem>(1, dmB);
-        err |= kernel->SetArgument<cl_mem>(2, dmC);
-        err |= kernel->SetArgument<const int>(3, M);
-        err |= kernel->SetArgument<const int>(4, N);
-        err |= kernel->SetArgument<const int>(5, K);
+        err = kernel.SetArgument(0, dmA);
+        err |= kernel.SetArgument(1, dmB);
+        err |= kernel.SetArgument(2, dmC);
+        err |= kernel.SetArgument(3, M);
+        err |= kernel.SetArgument(4, N);
+        err |= kernel.SetArgument(5, K);
 
         if (err != CL_SUCCESS) {
-            std::cout << "Failed to set kernel arguments: " << err << " (" << FILE_NAME(__FILE__) << " > Matrix::Multiply)\n";
+            ERROR_CL("Failed to set kernel arguments", err);
             return err;
         }
 
-        err = clEnqueueNDRangeKernel(CL::command_queue, kernel->clkernel, 2, nullptr, gws, lws, 0, nullptr, nullptr);
+        err = clEnqueueNDRangeKernel(CL::command_queue, kernel.clkernel, 2, nullptr, gws, lws, 0, nullptr, nullptr);
 
         if (err != CL_SUCCESS) {
-            std::cout << "Failed to execute kernel: " << err << " (" << FILE_NAME(__FILE__) << " > Matrix::Multiply)\n";
+            ERROR_CL("Failed to execute kernel", err);
             // return err;
         }
 
@@ -76,13 +74,13 @@ namespace Matrix {
     // ) {
     //     cl_int err;
 
-    //     err = kernel->SetArgument<const cl_mem>(0, dmA);
-    //     err |= kernel->SetArgument<const cl_mem>(1, dmB);
-    //     err |= kernel->SetArgument<cl_mem>(2, dmC);
-    //     err |= kernel->SetArgument<const int>(3, M);
-    //     err |= kernel->SetArgument<const int>(4, N);
-    //     err |= kernel->SetArgument<const int>(5, K);
-    //     err |= kernel->SetArgument<const int>(6, batch_size);
+    //     err = kernel->SetArgument(0, dmA);
+    //     err |= kernel->SetArgument(1, dmB);
+    //     err |= kernel->SetArgument(2, dmC);
+    //     err |= kernel->SetArgument(3, M);
+    //     err |= kernel->SetArgument(4, N);
+    //     err |= kernel->SetArgument(5, K);
+    //     err |= kernel->SetArgument(6, batch_size);
 
     //     if (err != CL_SUCCESS) {
     //         std::cout << "Failed to set kernel arguments: " << err << " (" << FILE_NAME(__FILE__) << " > Matrix:BatchedMultiply)\n";
@@ -111,27 +109,27 @@ namespace Matrix {
     // }
 
     cl_int Add(
-        Kernel* kernel,
+        Kernel& kernel,
         const cl_mem& dmA, const cl_mem& dmB, cl_mem& dmC,
         //float* C,
         const size_t size
     ) {
         cl_int err;
 
-        err = kernel->SetArgument<const cl_mem>(0, dmA);
-        err |= kernel->SetArgument<const cl_mem>(1, dmB);
-        err |= kernel->SetArgument<cl_mem>(2, dmC);
-        // err |= kernel->SetArgument<const int>(3, size);
+        err = kernel.SetArgument(0, dmA);
+        err |= kernel.SetArgument(1, dmB);
+        err |= kernel.SetArgument(2, dmC);
+        // err |= kernel.SetArgument(3, size);
 
         if (err != CL_SUCCESS) {
-            std::cout << "Failed to set kernel arguments: " << err << " (" << FILE_NAME(__FILE__) << " > Matrix:Add)\n";
+            ERROR_CL("Failed to set kernel arguments", err);
             return err;
         }
 
-        err = clEnqueueNDRangeKernel(CL::command_queue, kernel->clkernel, 1, nullptr, &size, nullptr, 0, nullptr, nullptr);
+        err = clEnqueueNDRangeKernel(CL::command_queue, kernel.clkernel, 1, nullptr, &size, nullptr, 0, nullptr, nullptr);
 
         if (err != CL_SUCCESS) {
-            std::cout << "Failed to execute kernel: " << err << " (" << FILE_NAME(__FILE__) << " > Matrix:Add)\n";
+            ERROR_CL("Failed to execute kernel", err);
             // return err;
         }
 
@@ -146,21 +144,21 @@ namespace Matrix {
         return err;
     }
 
-    cl_int Scale(Kernel* kernel, cl_mem& mat, const size_t size, const float k) {
+    cl_int Scale(Kernel& kernel, cl_mem& mat, const size_t size, const float k) {
         cl_int err;
 
-        err = kernel->SetArgument<cl_mem>(0, mat);
-        err |= kernel->SetArgument<const float>(1, k);
+        err = kernel.SetArgument(0, mat);
+        err |= kernel.SetArgument(1, k);
 
         if (err != CL_SUCCESS) {
-            std::cout << "Failed to set kernel arguments: " << err << " (" << FILE_NAME(__FILE__) << " > Matrix::Scale)\n";
+            ERROR_CL("Failed to set kernel arguments", err);
             return err;
         }
 
-        err = clEnqueueNDRangeKernel(CL::command_queue, kernel->clkernel, 1, nullptr, &size, nullptr, 0, nullptr, nullptr);
+        err = clEnqueueNDRangeKernel(CL::command_queue, kernel.clkernel, 1, nullptr, &size, nullptr, 0, nullptr, nullptr);
 
         if (err != CL_SUCCESS) {
-            std::cout << "Failed to execute kernel: " << err << " (" << FILE_NAME(__FILE__) << " > Matrix::Scale)\n";
+            ERROR_CL("Failed to execute kernel", err);
         }
 
         return err;
@@ -176,47 +174,47 @@ namespace Matrix {
     //     return err;
     // }
 
-    cl_int Populate(Kernel* kernel, cl_mem& mat, const size_t size, const float value) {
+    cl_int Populate(Kernel& kernel, cl_mem& mat, const size_t size, const float value) {
         cl_int err;
 
-        err = kernel->SetArgument<cl_mem>(0, mat);
-        err |= kernel->SetArgument<const float>(1, value);
+        err = kernel.SetArgument(0, mat);
+        err |= kernel.SetArgument(1, value);
 
         if (err != CL_SUCCESS) {
-            std::cout << "Failed to set kernel arguments: " << err << " (" << FILE_NAME(__FILE__) << " > Matrix::Populate)\n";
+            ERROR_CL("Failed to set kernel arguments", err);
             return err;
         }
 
-        err = clEnqueueNDRangeKernel(CL::command_queue, kernel->clkernel, 1, nullptr, &size, nullptr, 0, nullptr, nullptr);
+        err = clEnqueueNDRangeKernel(CL::command_queue, kernel.clkernel, 1, nullptr, &size, nullptr, 0, nullptr, nullptr);
 
         if (err != CL_SUCCESS) {
-            std::cout << "Failed to execute kernel: " << err << " (" << FILE_NAME(__FILE__) << " > Matrix::Populate)\n";
+            ERROR_CL("Failed to execute kernel", err);
         }
 
         return err;
     }
 
-    cl_int Randomise(Kernel* kernel, cl_mem& mat, const size_t size, const float min, const float max, uint32_t seed) {
+    cl_int Randomise(Kernel& kernel, cl_mem& mat, const size_t size, const float min, const float max, uint32_t seed) {
         cl_int err;
 
         if (!seed) {
             seed = rand();
         }
 
-        err = kernel->SetArgument<cl_mem>(0, mat);
-        err |= kernel->SetArgument<const float>(1, min);
-        err |= kernel->SetArgument<const float>(2, max);
-        err |= kernel->SetArgument<const uint32_t>(3, seed);
+        err = kernel.SetArgument(0, mat);
+        err |= kernel.SetArgument(1, min);
+        err |= kernel.SetArgument(2, max);
+        err |= kernel.SetArgument(3, seed);
 
         if (err != CL_SUCCESS) {
-            std::cout << "Failed to set kernel arguments: " << err << " (" << FILE_NAME(__FILE__) << " > Matrix::Randomise)\n";
+            ERROR_CL("Failed to set kernel arguments", err);
             return err;
         }
 
-        err = clEnqueueNDRangeKernel(CL::command_queue, kernel->clkernel, 1, nullptr, &size, nullptr, 0, nullptr, nullptr);
+        err = clEnqueueNDRangeKernel(CL::command_queue, kernel.clkernel, 1, nullptr, &size, nullptr, 0, nullptr, nullptr);
 
         if (err != CL_SUCCESS) {
-            std::cout << "Failed to execute kernel: " << err << " (" << FILE_NAME(__FILE__) << " > Matrix::Randomise)\n";
+            ERROR_CL("Failed to execute kernel", err);
         }
 
         return err;

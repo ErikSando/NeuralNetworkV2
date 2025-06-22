@@ -13,10 +13,17 @@ class Kernel {
         return clSetKernelArg(clkernel, index, sizeof(T), &value);
     }
 
-    cl_int SetArgumentArray(cl_uint index, const int size) {
-        return clSetKernelArg(clkernel, index, size, nullptr);
+    template<typename T>
+    cl_int SetLocalArrayArgument(cl_uint index, const int size) {
+        return clSetKernelArg(clkernel, index, size * sizeof(T), nullptr);
     }
 
-    cl_program clprogram;
-    cl_kernel clkernel;
+    cl_program clprogram = nullptr;
+    cl_kernel clkernel = nullptr;
+
+    Kernel(const Kernel&) = delete;
+    Kernel& operator=(const Kernel&) = delete;
+
+    Kernel(Kernel&&) noexcept;
+    Kernel& operator=(Kernel&&) noexcept;
 };
