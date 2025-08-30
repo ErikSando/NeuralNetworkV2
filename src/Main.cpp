@@ -1,7 +1,7 @@
 #include <iostream>
 
-#include "Config.h"
-#include "Thing.h"
+#include "Config.hpp"
+#include "Thing.hpp"
 
 int main() {
     cl_int err = CL::Init();
@@ -13,9 +13,9 @@ int main() {
 
     std::cout << "Batch size: " << BATCH_SIZE << " samples\n";
 
-    int _ = CommandLoop();
+    int exit_code = CommandLoop();
 
-    CL::Destroy();
+    CL::Terminate();
 
-    return _;
+    return exit_code;
 }

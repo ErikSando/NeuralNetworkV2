@@ -1,10 +1,10 @@
 #include <cmath>
 #include <cstring>
 
-#include "DataParser.h"
-#include "Loss.h"
-#include "Matrix.h"
-#include "NeuralNetwork.h"
+#include "DataParser.hpp"
+#include "Loss.hpp"
+#include "Matrix.hpp"
+#include "NeuralNetwork.hpp"
 
 // test if re-using cl_mem objects can improve speed
 

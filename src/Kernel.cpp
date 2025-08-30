@@ -5,8 +5,8 @@
 
 #include "CL/cl.h"
 
-#include "Kernel.h"
-#include "Thing.h"
+#include "Kernel.hpp"
+#include "Thing.hpp"
 
 char* read_file(const char* file_path) {
     std::ifstream file(file_path, std::ios::binary | std::ios::ate);
@@ -54,11 +54,12 @@ Kernel::Kernel(const char* kernel_path, const char* name) {
     err = clBuildProgram(clprogram, 0, nullptr, nullptr, nullptr, nullptr);
 
     if (err != CL_SUCCESS) {
-        // size_t length;
-        // char buffer[2048];
-        // clGetProgramBuildInfo(clprogram, CL::device_id, CL_PROGRAM_BUILD_LOG, sizeof(buffer), buffer, &length);
+        size_t length;
+        clGetProgramBuildInfo(clprogram, CL::device_id, CL_PROGRAM_BUILD_LOG, 0, nullptr, &length);
+        char buffer[length];
+        clGetProgramBuildInfo(clprogram, CL::device_id, CL_PROGRAM_BUILD_LOG, sizeof(buffer), buffer, nullptr);
         ERROR_CL("Failed to build program executible", err);
-        // std::cout << buffer << "\n";
+        std::cout << buffer << "\n";
         return;
     }
 

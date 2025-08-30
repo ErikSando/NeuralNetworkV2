@@ -1,0 +1,4 @@
+While training on a batch, load the next batch at the same time
+
+Merge matrix multiplication with activation
+

@@ -2,7 +2,7 @@
 
 #include <string.h>
 
-#include "Config.h"
+#include "Config.hpp"
 
 inline float* get_targets(float* targets, int digit) {
     memset(targets, 0, N_OUT * sizeof(float));

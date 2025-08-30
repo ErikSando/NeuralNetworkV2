@@ -2,9 +2,9 @@
 
 #include "CL/cl.h"
 
-#include "Kernel.h"
-#include "Matrix.h"
-#include "Thing.h"
+#include "Kernel.hpp"
+#include "Matrix.hpp"
+#include "Thing.hpp"
 
 namespace Matrix {
     // cl_int Create(const float* host_mat, cl_mem& dev_mem, const size_t size) {

@@ -1,7 +1,7 @@
 #include <cmath>
 
-#include "Config.h"
-#include "Loss.h"
+#include "Config.hpp"
+#include "Loss.hpp"
 
 namespace Loss {
     float CategoricalCrossEntropy(float outputs[N_OUT], float targets[N_OUT]) {

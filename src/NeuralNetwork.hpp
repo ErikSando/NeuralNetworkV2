@@ -5,8 +5,8 @@
 
 #include "CL/cl.h"
 
-#include "Config.h"
-#include "Kernel.h"
+#include "Config.hpp"
+#include "Kernel.hpp"
 
 #define nullf ((float*) nullptr)
 

@@ -2,9 +2,9 @@
 #include <cassert>
 #include <string>
 
-#include "Config.h"
-#include "DataParser.h"
-#include "FileInput.h"
+#include "Config.hpp"
+#include "DataParser.hpp"
+#include "FileInput.hpp"
 
 #include <iostream>
 

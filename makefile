@@ -7,7 +7,7 @@ SRCDIR := src
 NAME := Main
 OUT := -o $(BINDIR)/$(NAME)
 SRCS := $(shell find $(SRCDIR) -name '*.cpp')
-DEFS := -DCL_TARGET_OPENCL_VERSION=100
+DEFS := -DCL_TARGET_OPENCL_VERSION=200
 
 all:
 	$(CXX) -Ofast $(OUT) $(SRCS) $(CXXFLAGS) $(DEFS) -DNDEBUG

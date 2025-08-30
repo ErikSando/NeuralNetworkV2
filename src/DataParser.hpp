@@ -2,7 +2,7 @@
 
 #include <array>
 
-#include "Config.h"
+#include "Config.hpp"
 
 struct ImageData {
     std::array<float, NODE_COUNT[INPUT]> pixels;

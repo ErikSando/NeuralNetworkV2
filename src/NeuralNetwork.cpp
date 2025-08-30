@@ -2,9 +2,9 @@
 #include <ctime>
 #include <random>
 
-#include "Config.h"
-#include "Matrix.h"
-#include "NeuralNetwork.h"
+#include "Config.hpp"
+#include "Matrix.hpp"
+#include "NeuralNetwork.hpp"
 
 NeuralNetwork::NeuralNetwork() {
     srand(time(nullptr));

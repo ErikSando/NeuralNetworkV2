@@ -2,7 +2,7 @@
 
 #include "CL/cl.h"
 
-#include "Kernel.h"
+#include "Kernel.hpp"
 
 namespace Activation {
     cl_int ReLU(Kernel& kernel, cl_mem& mem, const size_t size);

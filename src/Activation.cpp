@@ -3,9 +3,9 @@
 
 #include "CL/cl.h"
 
-#include "Activation.h"
-#include "Config.h"
-#include "Thing.h"
+#include "Activation.hpp"
+#include "Config.hpp"
+#include "Thing.hpp"
 
 namespace Activation {
     cl_int ReLU(Kernel& kernel, cl_mem& mem, const size_t size) {

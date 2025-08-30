@@ -21,7 +21,7 @@ namespace CL {
     extern cl_command_queue command_queue;
 
     extern cl_int Init();
-    extern void Destroy();
+    extern void Terminate();
 }
 
 extern int CommandLoop();

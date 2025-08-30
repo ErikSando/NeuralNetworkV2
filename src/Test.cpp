@@ -4,13 +4,21 @@
 
 #include "CL/cl.h"
 
-#include "DataParser.h"
-#include "Matrix.h"
-#include "NeuralNetwork.h"
+#include "DataParser.hpp"
+#include "Matrix.hpp"
+#include "NeuralNetwork.hpp"
 
 cl_int NeuralNetwork::Test(TestData& test_data, int batches) {
     test_data.correct = 0;
     test_data.incorrect = 0;
+
+    cl_mem dm_inputs;
+    cl_int err = Matrix::Create(nullf, dm_inputs, BxI);
+    
+    if (err != CL_SUCCESS) {
+        ERROR_CL("Failed to create device memory for inputs", err);
+        return err;
+    }
 
     for (int b = 0; b < batches; b++) {
         std::array<ImageData, BATCH_SIZE> image_data;
@@ -22,10 +30,12 @@ cl_int NeuralNetwork::Test(TestData& test_data, int batches) {
         std::array<float, BxO> outputs;
 
         for (size_t i = 0; i < BATCH_SIZE; i++) {
-            memcpy(image_data[i].pixels.begin(), inputs.begin() + i * N_INP, N_INP * sizeof(float));
+            memcpy(inputs.begin() + i * N_INP, image_data[i].pixels.begin(), N_INP * sizeof(float));
         }
 
-        cl_int err = GetOutputs(inputs, outputs);
+        Matrix::Transfer(inputs.data(), dm_inputs, BxI);
+
+        cl_int err = GetOutputs(dm_inputs, outputs);
 
         if (err != CL_SUCCESS) {
             ERROR_CL("Forward pass failed", err);

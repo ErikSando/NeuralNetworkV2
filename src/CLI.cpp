@@ -6,13 +6,11 @@
 #include <string.h>
 #include <vector>
 
-#include "Config.h"
-#include "DataParser.h"
-#include "FileInput.h"
-#include "Thing.h"
-#include "NeuralNetwork.h"
-
-#include "Matrix.h"
+#include "Config.hpp"
+#include "DataParser.hpp"
+#include "FileInput.hpp"
+#include "Thing.hpp"
+#include "NeuralNetwork.hpp"
 
 float randf() {
     return (float) rand() / (float) RAND_MAX;
@@ -129,7 +127,9 @@ int CommandLoop() {
             auto end = std::chrono::high_resolution_clock::now();
             auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 
-            std::cout << "Training complete in " << duration << " ms (" << epochs << " epoch/s)\n";
+            std::cout << "Training complete in " << duration << " ms (" << epochs << " epoch";
+            if (epochs > 1) std::cout << "s";
+            std::cout << ")\n";
         }
         else if (cmd == "test") {
             int batches = TESTING_ROWS / BATCH_SIZE;

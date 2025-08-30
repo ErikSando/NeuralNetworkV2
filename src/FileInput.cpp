@@ -5,8 +5,8 @@
 #include <iostream>
 #include <string>
 
-#include "Config.h"
-#include "FileInput.h"
+#include "Config.hpp"
+#include "FileInput.hpp"
 
 namespace FileInput {
     static std::array<uint32_t, TRAINING_ROWS> line_offsets;

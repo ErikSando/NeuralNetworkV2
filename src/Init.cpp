@@ -2,8 +2,8 @@
 
 #include "CL/cl.h"
 
-#include "Config.h"
-#include "Thing.h"
+#include "Config.hpp"
+#include "Thing.hpp"
 
 namespace CL {
     cl_platform_info platform_info;
@@ -61,18 +61,26 @@ namespace CL {
             return 1;
         }
 
-        command_queue = clCreateCommandQueue(context, device_id, 0, &err);
+        const cl_queue_properties queue_props[] = {
+            CL_QUEUE_PROPERTIES,
+            #ifndef NDEBUG
+            CL_QUEUE_PROFILING_ENABLE,
+            #endif
+            0
+        };
+
+        command_queue = clCreateCommandQueueWithProperties(context, device_id, queue_props, &err);
 
         if (!command_queue) {
             ERROR_CL("Failed to create command queue", err);
-            Destroy();
+            Terminate();
             return 1;
         }
 
         return CL_SUCCESS;
     }
 
-    void Destroy() {
+    void Terminate() {
         if (command_queue) clReleaseCommandQueue(command_queue);
         if (context) clReleaseContext(context);
     }

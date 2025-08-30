@@ -4,11 +4,11 @@
 
 #include "CL/cl.h"
 
-#include "Activation.h"
-#include "Config.h"
-#include "Matrix.h"
-#include "NeuralNetwork.h"
-#include "Thing.h"
+#include "Activation.hpp"
+#include "Config.hpp"
+#include "Matrix.hpp"
+#include "NeuralNetwork.hpp"
+#include "Thing.hpp"
 
 cl_int NeuralNetwork::ForwardPass(const cl_mem& inputs) {
     // this stuff with the inputs should probably be done by the function caller prior to the function call
